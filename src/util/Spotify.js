@@ -66,6 +66,42 @@ const Spotify={
                 });
             });
         });
+    },
+
+    getUserPlaylists(){
+        
+        const accessToken=Spotify.getAccessToken();
+        const headers = {Authorization: `Bearer ${accessToken}`};
+        let userId;
+        return fetch('https://api.spotify.com/v1/me',{headers:headers}).then(response=>response.json()).then(jsonResponse=>{
+            userId=jsonResponse.id;
+            return fetch(`https://api.spotify.com/v1/users/${userId}/playlists`,{headers:headers}).then(response=>response.json()).then(jsonResponse=>{
+                return jsonResponse.items.map(playlist=>({
+                    name: playlist.name,
+                    id: playlist.id
+                }));
+            });
+        });
+    },
+    getPlaylist(id){
+        if(!id){
+            return;
+        }
+        const accessToken=Spotify.getAccessToken();
+        const headers = {Authorization: `Bearer ${accessToken}`};
+        let userId;
+         return fetch('https://api.spotify.com/v1/me',{headers:headers}).then(response=>response.json()).then(jsonResponse=>{
+             userId=jsonResponse.id;
+             return fetch(`https://api.spotify.com/v1/users/${userId}/playlists/${id}/tracks`,{headers:headers}).then(response=>response.json()).then(jsonResponse=>{
+                return jsonResponse.items.map(item=>({
+                    id: item.track.id,
+                    name: item.track.name,
+                    artist: item.track.artists[0].name,
+                    album: item.track.album.name,
+                    uri: item.track.uri
+                }));
+             });
+         });
     }
 };
 

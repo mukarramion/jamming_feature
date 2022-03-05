@@ -11,13 +11,21 @@ class App extends React.Component {
     this.state={
       searchResults:[],
       playlistName:'My Playlist',
-      playlistTracks:[]
+      playlistTracks:[],
+      currentPlaylists:[]
     };
     this.addTrack=this.addTrack.bind(this);
     this.removeTrack=this.removeTrack.bind(this);
     this.updatePlaylistName=this.updatePlaylistName.bind(this);
     this.savePlaylist=this.savePlaylist.bind(this);
     this.search=this.search.bind(this);
+    this.selectPlaylist=this.selectPlaylist.bind(this);
+  }
+
+  componentWillMount(){
+    Spotify.getUserPlaylists().then(playlists=>{
+      this.setState({currentPlaylists:playlists});
+    });
   }
 
   addTrack(track){
@@ -55,6 +63,16 @@ class App extends React.Component {
     });
   }
 
+  selectPlaylist(name){
+    const playl=this.state.currentPlaylists.find(pl =>pl.name===name);
+    Spotify.getPlaylist(playl.id).then(tracks=>{
+      this.setState({
+        playlistName:name,
+        playlistTracks:tracks
+      });
+    });
+  }
+
   render(){
     return (
       <div>
@@ -63,7 +81,7 @@ class App extends React.Component {
           <SearchBar onSearch={this.search}/>
           <div className="App-playlist">
             <SearchResults searchResults={this.state.searchResults} onAdd={this.addTrack}/>
-            <Playlist playlistName={this.state.playlistName} playlistTracks={this.state.playlistTracks} onRemove={this.removeTrack} onNameChange={this.updatePlaylistName} onSave={this.savePlaylist}/>
+            <Playlist playlistName={this.state.playlistName} playlistTracks={this.state.playlistTracks} onRemove={this.removeTrack} onNameChange={this.updatePlaylistName} onSave={this.savePlaylist} playlists={this.state.currentPlaylists} onSelect={this.selectPlaylist}/>
           </div>
         </div>
       </div>
